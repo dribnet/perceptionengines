@@ -92,4 +92,22 @@ python render_images.py \
   --outfile outputs/test_length10_%SEQ%.jpg
 ```
 
+### Scoring System
+
+There is a separate scoring system currently based on keras pre-trained ImageNet Challenge models.
+
+If you have an image, response graphs can be generated showing topN responses. For example:
+
+```bash
+python eval_images.py \
+  --input-glob 'tick.jpg' \
+  --target-class tick \
+  --do-graphfile
+```
+
+By default a stock set of 6 ImageNet models will be used, and the output file will be graph_foo.
+
+### Planning System
+
+(stay tuned)
 
