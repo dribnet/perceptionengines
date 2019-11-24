@@ -29,7 +29,7 @@ def load_image_function(fullname):
     print("Loading {} function from {}".format(model_class_name, model_module_name))        
     try:
         image_function = getattr(importlib.import_module(model_module_name), model_class_name)
-    except ImportError as e:
+    except (ImportError, AttributeError) as e:
         # fallback: try loading from "rendering" subdirectory of library path (todo: default/enforce?)
         try:
             image_function = getattr(importlib.import_module("rendering." + model_module_name), model_class_name)

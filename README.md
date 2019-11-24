@@ -99,7 +99,7 @@ There is a separate scoring system currently based on keras pre-trained ImageNet
 If you have an image, response graphs can be generated showing topN responses. For example:
 
 ```bash
-python eval_images.py \
+python score_images.py \
   --input-glob 'tick.jpg' \
   --target-class tick \
   --do-graphfile
@@ -108,6 +108,21 @@ python eval_images.py \
 By default a stock set of 6 ImageNet models will be used, and the output file will be graph_foo.
 
 ### Planning System
+
+First version - make a bald eagle.
+
+```bash
+mkdir -p outputs/draw_bald_eagle_1060
+python plan_image.py \
+  --outdir outputs/draw_bald_eagle_1060 \
+  --imagenet-index 22 \
+  --random-seed 1060 \
+  --networks vgg19,resnet50,inceptionv3,xception \
+  --renderer lines1 \
+  --num-lines 30
+```
+
+...
 
 (stay tuned)
 
