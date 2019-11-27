@@ -10,6 +10,7 @@ from classloader import ScoringInterface
 
 from google.cloud import vision as vision
 google_client = None
+min_api_score = 0.1
 
 import sys
 

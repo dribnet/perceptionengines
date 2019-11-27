@@ -345,7 +345,7 @@ def main():
 
             # print(k, cur_target_classes, decoded)
 
-            model_suffix = k.split(":")[-1]
+            model_suffix = k.split(":")[0]
 
             decoded = tie_promotion(decoded, cur_target_classes)
             if args.label_replace is not None:
