@@ -279,7 +279,8 @@ def main():
             img = image.load_img(img_path, target_size=target_size)
             x = image.img_to_array(img)
             x = np.expand_dims(x, axis=0)
-            x = image_preprocessor(x)
+            if image_preprocessor is not None:
+                x = image_preprocessor(x)
 
             pred_table[k] = model.predict(x)
 
