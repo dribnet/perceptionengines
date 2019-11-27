@@ -5,7 +5,7 @@ import keras
 class Scoring(ScoringInterface): 
     def __init__(self, config):
         super(Scoring, self).__init__()
-        self.model = keras.applications.resnet.ResNet50()
+        self.model = keras.applications.densenet.DenseNet201()
 
     def predict(self, batch, explain=False):
         return self.model.predict(batch)
@@ -14,5 +14,5 @@ class Scoring(ScoringInterface):
         return (224, 224)
 
     def get_input_preprocessor(self):
-        return keras.applications.resnet.preprocess_input
+        return keras.applications.densenet.preprocess_input
 
