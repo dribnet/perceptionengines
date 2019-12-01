@@ -105,7 +105,7 @@ python score_images.py \
   --do-graphfile
 ```
 
-![tick graph](https://github.com/dribnet/perceptionengines/releases/download/resources1/graph_tick_default.jpg)
+![tick graph](https://user-images.githubusercontent.com/945979/69919751-35bf0980-14e5-11ea-9e03-7ead3667d3c7.jpg)
 
 Want to see more graphs? Try all keras imagenet models (currently 18):
 
@@ -117,7 +117,7 @@ python score_images.py \
   --do-graphfile
 ```
 
-![tick graph with more networks](https://github.com/dribnet/perceptionengines/releases/download/resources1/graph_tick18.jpg)
+![tick graph with more networks](https://user-images.githubusercontent.com/945979/69919752-35bf0980-14e5-11ea-8ade-8f0f65805da7.jpg)
 
 
 
