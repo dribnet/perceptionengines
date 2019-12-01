@@ -30,7 +30,7 @@ def render(a, size):
 ```
 
 The numpy array a is a variable list of length 8 vectors and size is
-the dimensions of the output image in pixels. The renderer should simply
+the dimensions of the output image in pixels. The renderer should
 generate and return an image. Its very important for the output images
 to be identical when size varies.
 
@@ -40,7 +40,7 @@ Here are a bunch of different ways to run `render_images` with more explicit
 arguments.
 
 
-Provide the renderer, random seed, size, and output file manually
+Provide the renderer, random seed, size, and size manually
 ```bash
 python render_images.py \
   --renderer lines1 \
@@ -56,7 +56,7 @@ python render_images.py \
   --size 600
 ```
 
-And will change when the random seed is changed
+And should change when the random seed is changed
 ```bash
 python render_images.py \
   --renderer lines1 \
@@ -73,7 +73,7 @@ python render_images.py \
   --size 600
 ```
 
-The output file can be fixed and named with different file types possible:
+The output file can be fixed and named with different file formats possible:
 ```bash
 python render_images.py \
   --renderer lines1 \
@@ -83,7 +83,7 @@ python render_images.py \
   --outfile outputs/test_length10.jpg
 ```
 
-Templated output file names using variables are handy. SEQ will auto-increment when re-run. (run this one a few times)
+Templated output file names using variables are handy. SEQ will auto-increment when re-run. (run this one a few times to get different versions)
 ```bash
 python render_images.py \
   --renderer lines1 \
@@ -96,7 +96,7 @@ python render_images.py \
 
 There is a separate scoring system currently based on keras pre-trained ImageNet Challenge models.
 
-If you have an image, response graphs can be generated showing topN responses. For example:
+If you have an image, response graphs can be generated showing topN responses. By default a stock set of 6 ImageNet models will be used, and the output file will be graph_foo.
 
 ```bash
 python score_images.py \
@@ -105,7 +105,21 @@ python score_images.py \
   --do-graphfile
 ```
 
-By default a stock set of 6 ImageNet models will be used, and the output file will be graph_foo.
+![tick graph](https://github.com/dribnet/perceptionengines/releases/download/resources1/graph_tick_default.jpg)
+
+Want to see more graphs? Try all keras imagenet models (currently 18):
+
+```bash
+python score_images.py \
+  --input-glob 'tick.jpg' \
+  --target-class tick \
+  --networks all \
+  --do-graphfile
+```
+
+![tick graph with more networks](https://github.com/dribnet/perceptionengines/releases/download/resources1/graph_tick18.jpg)
+
+
 
 ### Planning System
 
@@ -117,7 +131,6 @@ python plan_image.py \
   --outdir outputs/draw_bald_eagle_1060 \
   --imagenet-index 22 \
   --random-seed 1060 \
-  --networks vgg19,resnet50,inceptionv3,xception \
   --renderer lines1 \
   --num-lines 30
 ```
