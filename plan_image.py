@@ -12,7 +12,8 @@ import os
 import random
 import tensorflow as tf
 
-from utils import get_active_models_from_arg
+from utils import get_active_models_from_arg, open_class_mapping, get_class_index_list
+from utils import get_class_label, get_class_fullname
 from classloader import ScoringInterface, load_image_function
 
 model_inceptionv3 = None
@@ -443,15 +444,15 @@ def main():
                         help="read/write to category log file")
     parser.add_argument('--maxcats', default=1,
                         help="maximum entries in catlog before category is blacklisted")
-    parser.add_argument('--imagenet-index', default=None,
-                        help='which imagenet index to optimize')
+    parser.add_argument('--target-class', default=None,
+                        help='which target classes to optimize')
     parser.add_argument('--show-name', default=False, action='store_true',
                         help="show imagenet classname and exit")
     parser.add_argument('--show-friendly-name', default=False, action='store_true',
                         help="show imagenet classname and exit")
     parser.add_argument("--renderer", default="lines1",
                         help="renderer with image drawing function")
-    parser.add_argument("--networks", default="all",
+    parser.add_argument("--networks", default="train1",
                         help="comma separated list of networks")
     parser.add_argument('--random-seed', default=None, type=int,
                         help='Use a specific random seed (for repeatability)')
@@ -490,12 +491,11 @@ def main():
       render_size = args.render_size
       print("Overriding render_size to {}".format(render_size))
 
-    if args.imagenet_index is not None and args.imagenet_index.isdigit():
-      imagenet_indexes = [int(args.imagenet_index)]
-    elif args.imagenet_index == "none":
+    class_mapping = open_class_mapping()
+    if args.target_class is None or args.target_class == "none":
       imagenet_indexes = None
     else:
-      imagenet_indexes = list(map(int,args.imagenet_index.split(",")))
+      imagenet_indexes = get_class_index_list(class_mapping, args.target_class)
 
     # scale alpha and/or sigma
     if args.sigma_scale != 1:
@@ -522,22 +522,17 @@ def main():
         else:
           categories.append("face_{:04d}".format(int(label_index)))
       else:
-        class_file = os.path.expanduser("~/.keras/models/imagenet_class_index.json")
-        with open(class_file) as json_data:
-          d = json.load(json_data)
         categories = []
         for imagenet_index in imagenet_indexes:
-          imagenet_key = "{}".format(imagenet_index)
-          friendly_name = d[imagenet_key][1]
-          friendly_name = friendly_name.replace("'","")
           if args.show_name:
-            print(d[imagenet_key][0])
+            print(get_class_fullname(class_mapping, imagenet_index))
             sys.exit(0)
           if args.show_friendly_name:
-            print(friendly_name)
+            print(get_class_label(class_mapping, imagenet_index))
             sys.exit(0)
-          if imagenet_key in d:
-            categories.append(friendly_name)
+          class_label = get_class_label(class_mapping, imagenet_index)
+          if class_label is not None:
+            categories.append(class_label)
           else:
             categories.append("category_{:04d}".format(int(imagenet_key)))
       print("----> Processing {}".format(categories))

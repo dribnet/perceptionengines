@@ -137,17 +137,20 @@ python score_images.py \
 
 ### Planning System
 
-First version - make a bald eagle.
+Let's get started by drawing a birdhouse.
 
 ```bash
-mkdir -p outputs/draw_bald_eagle_1060
 python plan_image.py \
-  --outdir outputs/draw_bald_eagle_1060 \
-  --imagenet-index 22 \
+  --outdir outputs/birdhouse_1060 \
+  --target-class birdhouse \
   --random-seed 1060 \
   --renderer lines1 \
   --num-lines 30
 ```
+
+This optimizes a drawing to trigger a label of 'birdhouse' on a default set of four
+ImageNet models. After several iterations, there will program will end and save a file
+parametre file `best.npy` in the output directory along with a preview called `best.png`.
 
 ...
 
