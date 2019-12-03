@@ -23,6 +23,9 @@ on the canvas. With no arguments, the lines will be randomly generated
 and then saved to a templated file. Take note of the printed output file
 and open it up to see what was created.
 
+![example default output](https://user-images.githubusercontent.com/945979/70071433-42b13980-165a-11ea-80bc-07548473bed7.jpg)
+
+
 A renderer is really just a python file that contains a render function:
 ```python
 # input: array of real vectors, length 8, each component normalized 0-1
@@ -32,12 +35,8 @@ def render(a, size):
 The numpy array a is a variable list of length 8 vectors and size is
 the dimensions of the output image in pixels. The renderer should
 generate and return an image. Its very important for the output images
-to be identical when size varies.
-
-
-The best way to get started is to make a copy of lines1 and try your own stuff.
-Here are a bunch of different ways to run `render_images` with more explicit
-arguments.
+to be identical when size varies. Here are a bunch of different ways to
+run `render_images` with more explicit arguments.
 
 
 Provide the renderer, random seed, size, and size manually
@@ -45,24 +44,30 @@ Provide the renderer, random seed, size, and size manually
 python render_images.py \
   --renderer lines1 \
   --random-seed 3 \
-  --size 1200
+  --size 600
   ```
+
+![render_seed](https://user-images.githubusercontent.com/945979/70071432-42b13980-165a-11ea-9d6d-bdd14f7b13c4.jpg)
 
 Now that we are supplying a fixed random-seed, we can test if this matches when scaled
 ```bash
 python render_images.py \
   --renderer lines1 \
   --random-seed 3 \
-  --size 600
+  --size 300
 ```
+
+![render_seed_small](https://user-images.githubusercontent.com/945979/70071431-42b13980-165a-11ea-847a-d7003d76c168.jpg)
 
 And should change when the random seed is changed
 ```bash
 python render_images.py \
   --renderer lines1 \
   --random-seed 4 \
-  --size 600
+  --size 300
 ```
+
+![render_seed_small_r4](https://user-images.githubusercontent.com/945979/70071430-4218a300-165a-11ea-9b08-69a51e5fe285.jpg)
 
 To draw fewer lines, change the length of the input array
 ```bash
@@ -70,8 +75,10 @@ python render_images.py \
   --renderer lines1 \
   --random-seed 4 \
   --length 10 \
-  --size 600
+  --size 300
 ```
+
+![render_seed_small_r4_l10](https://user-images.githubusercontent.com/945979/70071429-4218a300-165a-11ea-9697-3cf11ec4532e.jpg)
 
 The output file can be fixed and named with different file formats possible:
 ```bash
@@ -79,18 +86,25 @@ python render_images.py \
   --renderer lines1 \
   --random-seed 4 \
   --length 10 \
-  --size 600 \
+  --size 300 \
   --outfile outputs/test_length10.jpg
 ```
+
+![test_length10](https://user-images.githubusercontent.com/945979/70071428-4218a300-165a-11ea-8282-117b7cb43254.jpg)
 
 Templated output file names using variables are handy. SEQ will auto-increment when re-run. (run this one a few times to get different versions)
 ```bash
 python render_images.py \
   --renderer lines1 \
   --length 10 \
-  --size 600 \
+  --size 300 \
   --outfile outputs/test_length10_%SEQ%.jpg
 ```
+
+![test_length10_10](https://user-images.githubusercontent.com/945979/70071423-41800c80-165a-11ea-8b75-6a819bcb19d8.jpg)
+![test_length10_09](https://user-images.githubusercontent.com/945979/70071425-41800c80-165a-11ea-8094-e7f4194f6e8f.jpg)
+![test_length10_08](https://user-images.githubusercontent.com/945979/70071427-41800c80-165a-11ea-94a7-d8d2437f617b.jpg)
+
 
 ### Scoring System
 
