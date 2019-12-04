@@ -192,7 +192,7 @@ python score_images.py \
 
 Wow - this result generalizes really well to other network architectures. The first networks in yellow were used to make this image, but all of the other networks also give strong top1 results. But does this result also generalize to other training sets?
 
-If you have google vision and aws credentials setup correctly you can additionaly test this image against their public APIs (and specify the target label).
+If you have google vision and aws credentials setup correctly you can additionaly test this image against their public APIs (and specify the target label). And here we also specify the `graphfile-prefix` explicitly which changes the output filename.
 
 ```bash
 python score_images.py \
@@ -206,6 +206,6 @@ python score_images.py \
 
 ![graph_apis_best_960](https://user-images.githubusercontent.com/945979/70126830-aa10cd00-16de-11ea-93c6-efb38fb86791.jpg)
 
-The google vision results seem to have nothing to do with birdhouses, just labels for things like "illustration" and "clip art". The amazon rekognition results are also not showing an exact match for `birdhouse`, though reading the tea leaves we do see there are top5 results for `building` and the more specific label `bird feeder` - both of which seem like neighboring concepts.
+The google vision results seem to have nothing to do with birdhouses, just labels for things like `illustration` and `clip art`. The amazon rekognition results are also not showing an exact match for `birdhouse`, though reading the tea leaves we do see there are top5 results for `building` and the more specific label `bird feeder` - both of which seem like neighboring concepts.
 
 [stay tuned for more?]
