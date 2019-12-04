@@ -196,15 +196,15 @@ If you have google vision and aws credentials setup correctly you can additional
 
 ```bash
 python score_images.py \
-  --input-glob 'outputs/birdhouse_10?0/best_1920.jpg' \
+  --input-glob 'outputs/birdhouse_1080/best_1920.jpg' \
   --train1 train1 \
-  --networks all,aws:+birdhouse,goog:+birdhouse \
+  --networks train1,aws:+birdhouse,goog:+birdhouse \
   --target-class birdhouse \
   --graphfile-prefix graph_apis_ \
   --do-graphfile
 ```
 
-![graph_apis_best_960](https://user-images.githubusercontent.com/945979/70126830-aa10cd00-16de-11ea-93c6-efb38fb86791.jpg)
+![graph_apis_best_1920.jpg](https://user-images.githubusercontent.com/945979/70133620-5d7fbe80-16eb-11ea-85ab-2e69b0523df5.jpg)
 
 The google vision results seem to have nothing to do with birdhouses, just labels for things like `illustration` and `clip art`. The amazon rekognition results are also not showing an exact match for `birdhouse`, though reading the tea leaves we do see there are top5 results for `building` and the more specific label `bird feeder` - both of which seem like neighboring concepts.
 
