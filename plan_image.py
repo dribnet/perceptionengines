@@ -127,20 +127,25 @@ def get_optimization_function(active_models, imagenet_indexes, array_to_image_fn
     full_predictions = []
     for k in active_model_keys:
       model = active_models[k]
-      if isinstance(model, ScoringInterface):
-        target_size = model.get_target_size()        
-        image_preprocessor = model.get_input_preprocessor()
-      else:
-        target_size = get_target_size_from_name(k)
-        image_preprocessor = get_input_processor_from_name(k)
+      target_size = model.get_target_size()        
+      image_preprocessor = model.get_input_preprocessor()
 
       # images = target_size_table[target_size]
       images = np.copy(target_size_table[target_size])
-      batch = image_preprocessor(images)
+      if image_preprocessor is not None:
+        batch = image_preprocessor(images)
+      else:
+        batch = images
       preds = model.predict(batch)
       # print("PREDS:", preds.shape, preds)
       if isinstance(preds,dict) and "scores" in preds:
-        worthy = preds['scores']
+        # print(preds['scores'].shape)
+        if(len(preds['scores'].shape) == 1):
+          worthy = preds['scores']
+        elif preds['scores'].shape[1] == 1:
+          worthy = preds['scores'][:,0]
+        else:
+          worthy = preds['scores'][:,imagenet_indexes]
       else:
         worthy = preds[:,imagenet_indexes]
       # print("Worthy: {}".format(np.array(worthy).shape))
@@ -199,15 +204,14 @@ def get_optimization_function_noindex(active_models, array_to_image_fn, render_s
     full_predictions = []
     for k in active_model_keys:
       model = active_models[k]
-      if isinstance(model, ScoringInterface):
-        target_size = model.get_target_size()        
-      else:
-        target_size = get_target_size_from_name(k)
-      target_size = get_target_size_from_name(k)
+      target_size = model.get_target_size()        
+      image_preprocessor = model.get_input_preprocessor()
       images = np.copy(target_size_table[target_size])
       # images = target_size_table[target_size]
-      image_preprocessor = get_input_processor_from_name(k)
-      batch = image_preprocessor(images)
+      if image_preprocessor is not None:
+        batch = image_preprocessor(images)
+      else:
+        batch = images
       preds = model.predict(batch)
       worthy = preds[:,allowed]
       full_predictions.append(worthy)
