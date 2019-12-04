@@ -230,7 +230,7 @@ def get_optimization_function_noindex(active_models, array_to_image_fn, render_s
 # hyperparameters
 sigma = 0.01 # noise standard deviation
 alpha = 0.0005 # learning rate
-good_enough = 0.999
+good_enough = 0.9999
 max_dry_period = 30
 imagenet_classes = None
 

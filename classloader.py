@@ -46,7 +46,7 @@ def load_scoring_object(scoring_string):
         config_suffix = scoring_parts[1]
     model_class_name = "Scoring"
     model_module_name = fullname
-    print("Loading {} class from {}".format(model_class_name, model_module_name))
+    # print("Loading {} class from {}".format(model_class_name, model_module_name))
     try:
         scoring_class = getattr(importlib.import_module(model_module_name), model_class_name)
     except ImportError as e:
@@ -55,6 +55,6 @@ def load_scoring_object(scoring_string):
             scoring_class = getattr(importlib.import_module("scoring." + model_module_name), model_class_name)
         except ImportError as e:
             helpful_interface_message_exit(fullname, e)
-    print("class loaded.")
+    # print("class loaded.")
     scoring_object = scoring_class(config_suffix)
     return scoring_object

@@ -152,7 +152,60 @@ This optimizes a drawing to trigger a label of 'birdhouse' on a default set of f
 ImageNet models. After several iterations, there will program will end and save a file
 parametre file `best.npy` in the output directory along with a preview called `best.png`.
 
-...
+![birdhouse1](https://user-images.githubusercontent.com/945979/70126508-0f17f300-16de-11ea-9afa-ee6c083c4960.jpg)
 
-(stay tuned)
+You can run it a few times changing the `outdir` and `random-seed` to get different results.
 
+![birdhouse2](https://user-images.githubusercontent.com/945979/70126505-0f17f300-16de-11ea-83d7-fc6fdb89c083.jpg)
+![birdhouse3](https://user-images.githubusercontent.com/945979/70126507-0f17f300-16de-11ea-8d3c-5bbb071a5eb5.jpg)
+
+When you get one you like, you can use the `render_images.py` script to redraw it at higher resolution.
+
+```bash
+python render_images.py \
+  --input-glob 'outputs/birdhouse_1080/best.npy' \
+  --outbase best_1920.jpg \
+  --renderer lines1 \
+  --size 1920
+```
+
+![best_960](https://user-images.githubusercontent.com/945979/70126694-6f0e9980-16de-11ea-96ae-db1f80cc58a2.jpg)
+
+Here we use `input-glob` to provide the inputs (wildcards are allowed), and instead
+of outfile we use `outbase` which saves the named file in the same directory location
+as the input file.
+
+How well does this result generalize to other networks? To test that we can run on all
+ImageNet networks. It's also helpful to highligh the four networks which were used in
+"training" this image, and that group has the nickname "train1".
+
+```bash
+python score_images.py \
+  --input-glob 'outputs/birdhouse_1080/best_1920.jpg' \
+  --train1 train1 \
+  --target-class birdhouse \
+  --networks all \
+  --do-graphfile
+```
+
+![graph_best_960](https://user-images.githubusercontent.com/945979/70126831-aa10cd00-16de-11ea-9250-b9c357b9f182.jpg)
+
+Wow - this result generalizes really well to other network architectures. The first networks in yellow were used to make this image, but all of the other networks also give strong top1 results. But does this result also generalize to other training sets?
+
+If you have google vision and aws credentials setup correctly you can additionaly test this image against their public APIs (and specify the target label).
+
+```bash
+python score_images.py \
+  --input-glob 'outputs/birdhouse_10?0/best_1920.jpg' \
+  --train1 train1 \
+  --networks all,aws:+birdhouse,goog:+birdhouse \
+  --target-class birdhouse \
+  --graphfile-prefix graph_apis_ \
+  --do-graphfile
+```
+
+![graph_apis_best_960](https://user-images.githubusercontent.com/945979/70126830-aa10cd00-16de-11ea-93c6-efb38fb86791.jpg)
+
+The google vision results seem to have nothing to do with birdhouses, just labels for things like "illustration" and "clip art". The amazon rekognition results are also not showing an exact match for `birdhouse`, though reading the tea leaves we do see there are top5 results for `building` and the more specific label `bird feeder` - both of which seem like neighboring concepts.
+
+[stay tuned for more?]

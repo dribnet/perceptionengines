@@ -20,7 +20,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-from utils import get_active_models_from_arg
+from utils import get_active_models_from_arg, unpack_requested_networks
 from classloader import ScoringInterface
 
 def real_glob(rglob):
@@ -229,11 +229,11 @@ def main():
     train2_networks = []
     train3_networks = []
     if args.train1 is not None:
-        train1_networks = list(args.train1.split(","))
+        train1_networks = unpack_requested_networks(args.train1);
     if args.train2 is not None:
-        train2_networks = list(args.train2.split(","))
+        train2_networks = unpack_requested_networks(args.train2);
     if args.train3 is not None:
-        train3_networks = list(args.train3.split(","))
+        train3_networks = unpack_requested_networks(args.train3);
 
     if args.outfile is not None:
         outfile = open(args.outfile, 'w+')

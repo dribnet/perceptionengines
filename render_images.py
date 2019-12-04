@@ -60,7 +60,7 @@ if __name__ == '__main__':
                         help="inputs")
     parser.add_argument('--outfile', default="outputs/%RENDERER%_%DATE%_l%LEN%_r%SEED%_s%SIZE%_%SEQ%.png",
                         help="single output file")
-    parser.add_argument('--outbase', default="best_1200_redo.png", 
+    parser.add_argument('--outbase', default=None,
                          help='basename for the output file')
     parser.add_argument('--renderer', default='lines1',
                         help="(none)")
@@ -144,11 +144,11 @@ if __name__ == '__main__':
 
         for n in range(args.versions):
             im = array_to_image(input_array, args.size)
-            if args.outfile is not None:
-                outfile = args.outfile
-            else:
+            if args.outbase is not None:
                 dirname = os.path.dirname(infile)
                 outfile = os.path.join(dirname, args.outbase)
+            else:
+                outfile = args.outfile
 
             # somewhat messy handling of list case twice for file naming
             if not isinstance(im, list):
