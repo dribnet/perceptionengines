@@ -1,0 +1,4 @@
+Copyright (C) 2017-2019 Tom White <tom@sixdozen.com>
+
+The perception engines project can not be copied and/or distributed without
+the express permission of Tom White <tom@sixdozen.com>.
