@@ -352,6 +352,7 @@ def main():
                 # print("replacing ", args.label_replace)
                 decoded = string_replacement(decoded, args.label_replace)
 
+            clean_k = k.replace("/","_")
             if args.do_graphfile:
                 if k in train1_networks:
                     graph_color = graph_color_train1
@@ -365,7 +366,7 @@ def main():
                 else:
                     graph_color = graph_color_test
                     prefix="04"
-                plot_topk("{}/bars_{}_{}.png".format(bars_dir, prefix, k), decoded[:12], cur_target_classes, clip_length(model_suffix, 16), bgcolor=graph_color)
+                plot_topk("{}/bars_{}_{}.png".format(bars_dir, prefix, clean_k), decoded[:12], cur_target_classes, clip_length(model_suffix, 16), bgcolor=graph_color)
 
             if outfile is not None:
                 if len(decoded) == 0:
