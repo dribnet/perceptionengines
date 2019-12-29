@@ -175,7 +175,7 @@ graph_color_train2='#FFF8DC'
 graph_color_train3='#FFFCEE'
 
 def main():
-    parser = argparse.ArgumentParser(description="run vgg16")
+    parser = argparse.ArgumentParser(description="score images against classifiers")
     parser.add_argument('--input-glob', default='elephant.jpg',
                         help="inputs")
     parser.add_argument("--networks", default="standard",
