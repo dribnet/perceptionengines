@@ -1,6 +1,6 @@
 # Perception Engines
 
-Not complete yet! Should be coherent by 13 Dec 2019.
+Working implementation of Perception Engines software that uses machine perception to generate abstract visuals representing categories. For background see my [Perception Engines essay](https://medium.com/artists-and-machine-intelligence/perception-engines-8a46bc598d57) or my more recent paper [Shared Visual Abstactions](https://arxiv.org/abs/1912.04217).
 
 ## Getting Started
 
@@ -149,8 +149,8 @@ python plan_image.py \
 ```
 
 This optimizes a drawing to trigger a label of 'birdhouse' on a default set of four
-ImageNet models. After several iterations, there will program will end and save a file
-parametre file `best.npy` in the output directory along with a preview called `best.png`.
+ImageNet models. After several iterations, there will program will end and save a
+parameter file `best.npy` in the output directory along with a preview called `best.png`.
 
 ![birdhouse1](https://user-images.githubusercontent.com/945979/70126508-0f17f300-16de-11ea-9afa-ee6c083c4960.jpg)
 
@@ -208,4 +208,4 @@ python score_images.py \
 
 The google vision results seem to have nothing to do with birdhouses, just labels for things like `illustration` and `clip art`. The amazon rekognition results are also not showing an exact match for `birdhouse`, though reading the tea leaves we do see there are top5 results for `building` and the more specific label `bird feeder` - both of which seem like neighboring concepts.
 
-[stay tuned for more?]
+
