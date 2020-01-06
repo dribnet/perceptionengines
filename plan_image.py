@@ -143,12 +143,12 @@ def get_optimization_function(active_models, imagenet_indexes, array_to_image_fn
         if(len(preds['scores'].shape) == 1):
           worthy = preds['scores']
         elif preds['scores'].shape[1] == 1:
-          worthy = preds['scores'][:,0]
+          worthy = preds['scores']
         else:
           worthy = preds['scores'][:,imagenet_indexes]
       else:
         worthy = preds[:,imagenet_indexes]
-      # print("Worthy: {}".format(np.array(worthy).shape))
+      # print("Worthy {}: {}".format(k, np.array(worthy).shape))
       full_predictions.append(worthy)
 
     # convert predictions to np array

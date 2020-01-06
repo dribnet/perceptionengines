@@ -132,7 +132,7 @@ class Scoring(ScoringInterface):
 
         num_preds = len(all_values)
         preds = np.array([all_values]).reshape(num_preds, 1)
-        # print("GOOG SAYS", preds)
+        # print("GOOG SAYS", preds.shape, preds)
         return {"scores": preds, "decoded": all_decoded}
 
     def get_target_size(self):
