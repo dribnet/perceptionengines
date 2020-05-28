@@ -200,6 +200,8 @@ def main():
                         help="Make a new image file with graphs")
     parser.add_argument("--target-class", default=None,
                         help="target class for coloring output graph")
+    parser.add_argument("--trim-prefix", default=None,
+                        help="trim a prefix for a scoring module")
     parser.add_argument('--outfile', default=None,
                          help='path to where to put output file')
     parser.add_argument('--solo-outfile', default=False, action='store_true',
@@ -224,6 +226,10 @@ def main():
 
     active_models = get_active_models_from_arg(args.networks)
     active_model_keys = sorted(active_models.keys())
+
+    trim_prefix_left = None
+    if args.trim_prefix is not None:
+        trim_prefix_left, trim_prefix_right = args.trim_prefix.split(':', 2)
 
     train1_networks = []
     train2_networks = []
@@ -345,7 +351,10 @@ def main():
 
             # print(k, cur_target_classes, decoded)
 
-            model_suffix = k.split(":")[0]
+            if trim_prefix_left is not None and k.find(trim_prefix_left) >= 0:
+                model_suffix = k.replace(trim_prefix_left, trim_prefix_right)
+            else:
+                model_suffix = k.split(":")[0]
 
             decoded = tie_promotion(decoded, cur_target_classes)
             if args.label_replace is not None:
