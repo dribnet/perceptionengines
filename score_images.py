@@ -229,7 +229,11 @@ def main():
 
     trim_prefix_left = None
     if args.trim_prefix is not None:
-        trim_prefix_left, trim_prefix_right = args.trim_prefix.split(':', 2)
+        if ':' in args.trim_prefix:
+            trim_prefix_left, trim_prefix_right = args.trim_prefix.split(':', 2)
+        else:
+            trim_prefix_left = "remove"
+            trim_prefix_right = None
 
     train1_networks = []
     train2_networks = []
@@ -351,7 +355,9 @@ def main():
 
             # print(k, cur_target_classes, decoded)
 
-            if trim_prefix_left is not None and k.find(trim_prefix_left) >= 0:
+            if trim_prefix_left is not None and trim_prefix_left == 'remove':
+                model_suffix = k.split(":")[1]
+            elif trim_prefix_left is not None and k.find(trim_prefix_left) >= 0:
                 model_suffix = k.replace(trim_prefix_left, trim_prefix_right)
             else:
                 model_suffix = k.split(":")[0]
