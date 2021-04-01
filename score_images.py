@@ -15,12 +15,13 @@ from keras.applications.imagenet_utils import decode_predictions
 from PIL import Image
 from braceexpand import braceexpand
 from scipy import stats
+from tqdm import tqdm
 
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-from utils import get_active_models_from_arg, unpack_requested_networks
+from peutils import get_active_models_from_arg, unpack_requested_networks
 from classloader import ScoringInterface
 
 def real_glob(rglob):
@@ -153,7 +154,7 @@ def tie_promotion(decoded, correct_classes):
     best_ord = target_ord
     for ix in range(len(scores)):
         if scores[ix] == target_score and ix < best_ord:
-            print("Found better tie_breaker {} < {}".format(ix, best_ord))
+            # print("Found better tie_breaker {} < {}".format(ix, best_ord))
             best_ord = ix
         # for correct_class in clipped_correct_classes:
         #     if scores[ix] < target_score and correct_class in labels:
@@ -163,11 +164,20 @@ def tie_promotion(decoded, correct_classes):
         #         best_ord = ix
     # swap if necessary
     if best_ord != target_ord:
-        print("Swapping {} with {}", target_ord, best_ord)
+        # print("Swapping {} with {}", target_ord, best_ord)
         best_decoded = decoded[best_ord]
         decoded[best_ord] = decoded[target_ord]
         decoded[target_ord] = best_decoded
     return decoded
+
+def decoded_from_table(table, scores):
+    all_decoded = []
+    for i in range(scores):
+        cur_decoded = []
+        for j in range(len(table)):
+            cur_decoded.append((table[i][0], table[i][1], score[j][i]))
+        all_decoded.append(cur_decoded)
+    return all_decoded
 
 graph_color_test='#FFFFFF'
 graph_color_train1='#FFEB8D'
@@ -256,7 +266,14 @@ def main():
     else:
         outfile = None
 
-    for img_path in files:
+    if len(files) > 1:
+        files_iterator = tqdm(files)
+    else:
+        files_iterator = files
+
+    reported_outfiles = []
+
+    for img_path in files_iterator:
         if outfile is not None:
             outfile.write("{},".format(img_path))
         consensus_class = None
@@ -303,6 +320,9 @@ def main():
             if isinstance(preds,dict) and "decoded" in preds:
                 # print(k,preds)
                 decoded = preds['decoded']
+            elif isinstance(preds,dict) and "table" in preds:
+                # print(k,preds)
+                decoded = decoded_from_table(preds["table"], preds["scores"])
             elif k in nsfw_group:
                 # print('preds: {}'.format(preds.shape))
                 decoded = [
@@ -325,7 +345,14 @@ def main():
             decoded_table[k] = decoded
 
         if len(target_classes) == 1 and target_classes[0] == "first":
-            target_classes = [ decoded_table[active_model_keys[0]][1].replace("'","") ]
+            target_classes = [ decoded_table[active_model_keys[0]][0][1].replace("'","") ]
+
+        elif len(target_classes) == 2 and target_classes[0] == "use":
+            # print(target_classes[1])
+            # print(decoded_table)
+            # print(decoded_table[target_classes[1]])
+            # print(decoded_table[target_classes[1]][0])
+            target_classes = [ decoded_table[target_classes[1]][0][1].replace("'","") ]
 
         elif len(target_classes) == 1 and target_classes[0] == "vote":
             top_ones = []
@@ -355,12 +382,13 @@ def main():
 
             # print(k, cur_target_classes, decoded)
 
-            if trim_prefix_left is not None and trim_prefix_left == 'remove':
+            if trim_prefix_left is not None and trim_prefix_left == 'remove' and k.find(":") >= 0:
                 model_suffix = k.split(":")[1]
             elif trim_prefix_left is not None and k.find(trim_prefix_left) >= 0:
                 model_suffix = k.replace(trim_prefix_left, trim_prefix_right)
             else:
-                model_suffix = k.split(":")[0]
+                # model_suffix = k.split(":")[0]
+                model_suffix = k
 
             decoded = tie_promotion(decoded, cur_target_classes)
             if args.label_replace is not None:
@@ -438,13 +466,16 @@ def main():
             graphfile = os.path.join(dirname, "{}{}".format(args.graphfile_prefix,fname))
             command = "montage -tile x1 -background black -geometry +0+0 {} {}/blackimage.png -gravity northeast {}/triple.png {}".format(img_path, bars_dir, bars_dir, graphfile)
             os.system(command)
-            print("{}".format("-> {}".format(graphfile)))
+            reported_outfiles.append(graphfile)
             for hgx in glob.glob("{}/*.png".format(bars_dir)):
                 # print("REMOVING: {}".format(hgx))
                 os.remove(hgx)
             os.rmdir(bars_dir)
     if outfile is not None:
         outfile.close()
+    for report_file in reported_outfiles:
+        print("{}".format("-> {}".format(report_file)))
+
 
 if __name__ == '__main__':
     main()

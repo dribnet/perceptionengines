@@ -12,8 +12,8 @@ import os
 import random
 import tensorflow as tf
 
-from utils import get_active_models_from_arg, open_class_mapping, get_class_index_list
-from utils import get_class_label, get_class_fullname
+from peutils import get_active_models_from_arg, open_class_mapping, get_class_index_list
+from peutils import get_class_label, get_class_fullname
 from classloader import ScoringInterface, load_image_function
 
 model_inceptionv3 = None

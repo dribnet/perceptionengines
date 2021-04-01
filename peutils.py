@@ -13,7 +13,7 @@ model_groups = {
   "standard18,": "standard13,resnet101,resnet152,resnet50v2,resnet101v2,resnet152v2,",
   "train1,": "vgg19,resnet50,inceptionv3,xception,",
   "standard,":  "standard6,",
-  "all,": "standard18,",
+  "all_,": "standard18,",
 }
 
 def unpack_models_string(models_string):
