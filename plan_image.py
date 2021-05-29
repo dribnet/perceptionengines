@@ -91,6 +91,9 @@ def get_optimization_function(active_models, imagenet_indexes, array_to_image_fn
     do_score_reverse = True
 
   def f_optimize(wa):
+    global table_imagenet_override
+    global imagenet_classes
+
     active_model_keys = sorted(active_models.keys())
 
     # build a table indexed by target_size for all resized image lists
@@ -101,13 +104,15 @@ def get_optimization_function(active_models, imagenet_indexes, array_to_image_fn
         target_size = model.get_target_size()        
       else:
         target_size = get_target_size_from_name(k)
+      if target_size is None:
+        target_size = "None"
       target_size_table[target_size] = []
 
     # build lists of images at all needed sizes
     for w in wa:
       img = array_to_image_fn(w, render_size)
       for target_size in target_size_table:
-        if target_size is None:
+        if target_size == "None":
           imr = img
         else:
           imr = img.resize(target_size, resample=Image.BILINEAR)
@@ -129,6 +134,8 @@ def get_optimization_function(active_models, imagenet_indexes, array_to_image_fn
       model = active_models[k]
       target_size = model.get_target_size()        
       image_preprocessor = model.get_input_preprocessor()
+      if target_size is None:
+        target_size = "None"
 
       # images = target_size_table[target_size]
       images = np.copy(target_size_table[target_size])
@@ -146,6 +153,12 @@ def get_optimization_function(active_models, imagenet_indexes, array_to_image_fn
           worthy = preds['scores']
         else:
           worthy = preds['scores'][:,imagenet_indexes]
+        if table_imagenet_override is None and "table" in preds:
+          table_imagenet_override = preds["table"]
+          imagenet_classes = {}
+          for i, r in enumerate(table_imagenet_override):
+            imagenet_classes[f"{i}"] = r
+          print(f"imagenet classes is now {imagenet_classes['0']} etc.")
       else:
         worthy = preds[:,imagenet_indexes]
       # print("Worthy {}: {}".format(k, np.array(worthy).shape))
@@ -171,7 +184,15 @@ def get_optimization_function(active_models, imagenet_indexes, array_to_image_fn
 
 # closure around function to grab variables
 def get_optimization_function_noindex(active_models, array_to_image_fn, render_size):
+  TOTAL_NUM_CLASSES = 1000
+  if 'TOTAL_NUM_CLASSES' in os.environ:
+    num_classes = int(os.environ['TOTAL_NUM_CLASSES'])
+    print(f"-> num_classes now {num_classes}")  
+
   def f_optimize(wa):
+    global table_imagenet_override
+    global imagenet_classes
+
     active_model_keys = sorted(active_models.keys())
 
     # build a table indexed by target_size for all resized image lists
@@ -182,13 +203,18 @@ def get_optimization_function_noindex(active_models, array_to_image_fn, render_s
         target_size = model.get_target_size()        
       else:
         target_size = get_target_size_from_name(k)
+      if target_size is None:
+        target_size = "None"
       target_size_table[target_size] = []
 
     # build lists of images at all needed sizes
     for w in wa:
       img = array_to_image_fn(w, render_size)
       for target_size in target_size_table:
-        imr = img.resize(target_size, resample=Image.BILINEAR)
+        if target_size == "None":
+          imr = img
+        else:
+          imr = img.resize(target_size, resample=Image.BILINEAR)
         target_size_table[target_size].append(image.img_to_array(imr))
 
     # convert all lists to np arrays
@@ -196,7 +222,7 @@ def get_optimization_function_noindex(active_models, array_to_image_fn, render_s
       target_size_table[target_size] = np.array(target_size_table[target_size])
 
     # which indeices are allowed
-    all_elements = list(range(1000))
+    all_elements = list(range(num_classes))
     # all_elements = list(range(8631))
     allowed = np.array([x for x in all_elements if x not in cat_blacklist])
 
@@ -204,7 +230,9 @@ def get_optimization_function_noindex(active_models, array_to_image_fn, render_s
     full_predictions = []
     for k in active_model_keys:
       model = active_models[k]
-      target_size = model.get_target_size()        
+      target_size = model.get_target_size()
+      if target_size is None:
+        target_size = "None"
       image_preprocessor = model.get_input_preprocessor()
       images = np.copy(target_size_table[target_size])
       # images = target_size_table[target_size]
@@ -213,7 +241,26 @@ def get_optimization_function_noindex(active_models, array_to_image_fn, render_s
       else:
         batch = images
       preds = model.predict(batch)
-      worthy = preds[:,allowed]
+      # worthy = preds[:,allowed]
+      if isinstance(preds,dict) and "scores" in preds:
+        # print(preds['scores'].shape)
+        if(len(preds['scores'].shape) == 1):
+          print("A")
+          worthy = preds['scores']
+        elif preds['scores'].shape[1] == 1:
+          print("B")
+          worthy = preds['scores']
+        else:
+          # print("C")
+          worthy = preds['scores'][:,allowed]
+        if table_imagenet_override is None and "table" in preds:
+          table_imagenet_override = preds["table"]
+          imagenet_classes = {}
+          for i, r in enumerate(table_imagenet_override):
+            imagenet_classes[f"{i}"] = r
+          print(f"imagenet classes is now {imagenet_classes['0']} etc.")
+      else:
+        worthy = preds[:,allowed]
       full_predictions.append(worthy)
 
     # convert predictions to np array
@@ -237,13 +284,16 @@ alpha = 0.0005 # learning rate
 good_enough = 0.9999
 max_dry_period = 30
 imagenet_classes = None
+table_imagenet_override = None
 
 do_freeze_hack = None
+do_header_only = None
 
 def optimize(outdir, array_to_image, f, iterations=1000, numpop=100, preview_size=512, num_lines=13, init_size=6, init_step=4, initial_array=None, rand_head=None, head_length=2):
   global imagenet_classes
   global cur_cat_index
   global do_freeze_hack
+  global do_header_only
 
   if imagenet_classes == None:
     class_file = os.path.expanduser("~/.keras/models/imagenet_class_index.json")
@@ -255,6 +305,12 @@ def optimize(outdir, array_to_image, f, iterations=1000, numpop=100, preview_siz
       if 'FREEZE_HACK' in os.environ:
         print("-> freezing head and column 0")  
         do_freeze_hack = True
+
+  if do_header_only is None:
+      do_header_only = False
+      if 'HEADER_ONLY' in os.environ:
+        print("-> freezing everything except the header")  
+        do_header_only = True
 
   # start the optimization
   best = None;
@@ -387,6 +443,10 @@ def optimize(outdir, array_to_image, f, iterations=1000, numpop=100, preview_siz
       print("Applying freeze_hack")
       N[0:head_length,:] = 0
       N[:,0] = 0
+
+    if do_header_only:
+      print(f"Applying header_only with head_length of {head_length}")
+      N[head_length:,:] = 0
   
     # N = np.clip(N, -0.3, 0.3)
     # N[0] = np.zeros([num_circles, 8])
@@ -418,20 +478,24 @@ def optimize(outdir, array_to_image, f, iterations=1000, numpop=100, preview_siz
     dot = np.dot(N.T, A)
     scaled_dot = alpha/(numpop*sigma) * dot
 
-    if do_freeze_hack:
-      print("Applying freeze_hack on w")
-      w2 = w + scaled_dot.T
-      w2[0:head_length,:] = w[0:head_length,:]
-      w2[:,0] = w[:,0]
-      w = w2
-    else:
-      w = w + scaled_dot.T
+    w2 = w + scaled_dot.T
 
     if rand_head is not None and i < rand_head:
       print("COMMITTING RANDOM HEAD FOR ITERATION {}/{}".format(i,rand_head))
       best_index = np.argmax(R)
       w_best = w_try[best_index]
-      w[0:2] = w_best[0:2]
+      w2[0:2] = w_best[0:2]
+
+    if do_freeze_hack:
+      print("Applying freeze_hack on w")
+      w2[0:head_length,:] = w[0:head_length,:]
+      w2[:,0] = w[:,0]
+
+    if do_header_only:
+      print("Applying header_only on w")
+      w2[head_length:,:] = w[head_length:,:]
+
+    w = w2
 
     w = np.clip(w, 0.01, 0.99)
 
