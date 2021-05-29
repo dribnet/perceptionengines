@@ -170,14 +170,29 @@ def tie_promotion(decoded, correct_classes):
         decoded[target_ord] = best_decoded
     return decoded
 
-def decoded_from_table(table, scores):
-    all_decoded = []
-    for i in range(scores):
-        cur_decoded = []
-        for j in range(len(table)):
-            cur_decoded.append((table[i][0], table[i][1], score[j][i]))
-        all_decoded.append(cur_decoded)
-    return all_decoded
+        # cur_decoded = []
+        # for j in range(len(table)):
+        #     cur_decoded.append((table[j][0], table[j][1], scores[i][j]))
+        # all_decoded.extend(cur_decoded)
+
+def decoded_from_table(table, scores, top=5):
+    results = []
+    # print(scores.shape)
+    best =  np.argmax(scores[0])
+    # print("DFT ", best)
+    # print("DFT ", scores[0].shape)
+    # print(f"DFT best score is {best} -> {table[best]} = {scores[0][best]}")
+    # print(len(table), len(table[0]))
+    for i in range(len(scores)):
+        cur_score = scores[i]
+        top_indices = cur_score.argsort()[-(top):][::-1]
+        # top_indices = cur_score.argsort()[-(top+1):][:-1]
+        # print(top_indices)
+        result = [ (table[j][0], table[j][1], cur_score[j]) for j in top_indices]
+        result.sort(key=lambda x: x[2], reverse=True)
+        results.extend(result)
+    # print(results[:3])
+    return results
 
 graph_color_test='#FFFFFF'
 graph_color_train1='#FFEB8D'
@@ -302,10 +317,13 @@ def main():
             model = active_models[k]
             target_size = model.get_target_size()
             image_preprocessor = model.get_input_preprocessor()
+            # print("So size and prep: ", target_size, image_preprocessor)
     
             img = image.load_img(img_path, target_size=target_size)
+            # img.save(f"debug_this.png")
             x = image.img_to_array(img)
             x = np.expand_dims(x, axis=0)
+            # print("X shape: ", x.shape)
             if image_preprocessor is not None:
                 x = image_preprocessor(x)
 
@@ -322,7 +340,7 @@ def main():
                 decoded = preds['decoded']
             elif isinstance(preds,dict) and "table" in preds:
                 # print(k,preds)
-                decoded = decoded_from_table(preds["table"], preds["scores"])
+                decoded = decoded_from_table(preds["table"], preds["scores"], top=args.topn)
             elif k in nsfw_group:
                 # print('preds: {}'.format(preds.shape))
                 decoded = [
