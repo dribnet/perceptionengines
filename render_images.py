@@ -82,7 +82,7 @@ if __name__ == '__main__':
     render_parts = args.renderer.split('.')
     template_dict["RENDERER"] = render_parts[-1]
 
-    if args.random_seed:
+    if args.random_seed is not None:
         print("Setting random seed: ", args.random_seed)
         random.seed(args.random_seed)
         np.random.seed(args.random_seed)
