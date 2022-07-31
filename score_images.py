@@ -89,6 +89,7 @@ def plot_topk(filename, decoded, correct_classes, title, bgcolor):
 
     topprobs = [n[2] for n in decoded]
     labels = [clip_length(n[1],16).replace("'","") for n in decoded]
+    labels_lowercase = [l.lower() for l in labels]
     clipped_correct_classes = map(lambda s: clip_length(s,16), correct_classes)
     # correct_class = clip_length(correct_class,16)
     num_bars = len(decoded)
@@ -96,10 +97,10 @@ def plot_topk(filename, decoded, correct_classes, title, bgcolor):
     # if target_class in topk:
     #     barlist[topk.index(target_class)].set_color('r')
     for correct_class in clipped_correct_classes:
-        if correct_class in labels:
+        if correct_class.lower() in labels_lowercase:
             # current_index = labels.index(correct_class)
             # print("GRAPH: {} in {}/{} with score {} at {}".format(correct_class, labels, topprobs, topprobs[current_index], current_index))
-            barlist[labels.index(correct_class)].set_color('g')
+            barlist[labels_lowercase.index(correct_class)].set_color('g')
     # plt.sca(ax2)
     ax.set_ylim([0, 1.1])
     ax.set_xticks(range(num_bars))
@@ -320,7 +321,7 @@ def main():
             # print("So size and prep: ", target_size, image_preprocessor)
     
             img = image.load_img(img_path, target_size=target_size)
-            # img.save(f"debug_this.png")
+            # img.save(f"debug_this_{target_size}.png")
             x = image.img_to_array(img)
             x = np.expand_dims(x, axis=0)
             # print("X shape: ", x.shape)
