@@ -40,11 +40,16 @@ def emit_filename(filename, template_dict):
 def save_file_or_files(infile, im, outfile, template_dict):
     # allow list of outputs (layers)
     if isinstance(im, list):
-        for ix in range(len(im)):
-            outfile_name = outfile.format(ix+1)
-            emitted_filename = emit_filename(outfile_name, template_dict)
-            im[ix].save(emitted_filename)
+        if outfile.endswith("gif"):
+            emitted_filename = emit_filename(outfile, template_dict)
+            im[0].save(emitted_filename, save_all=True, append_images=im[1:], loop=0)
             print("{:7s} -> {}".format(infile, emitted_filename))
+        else:
+            for ix in range(len(im)):
+                template_dict["FRAME"] = (ix + 1)
+                emitted_filename = emit_filename(outfile, template_dict)
+                im[ix].save(emitted_filename)
+                print("{:7s} -> {}".format(infile, emitted_filename))
     else:
         emitted_filename = emit_filename(outfile, template_dict)
         im.save(emitted_filename)
@@ -58,12 +63,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="render dopes image")
     parser.add_argument('--input-glob', default=None,
                         help="inputs")
-    parser.add_argument('--outfile', default="outputs/%RENDERER%_%DATE%_l%LEN%_r%SEED%_s%SIZE%_%SEQ%.png",
+    parser.add_argument('--outfile', default="outputs/%RENDERER%_%DATE%_l%LEN%_r%SEED%_s%SIZE%_f%FRAME%_%SEQ%.png",
                         help="single output file")
     parser.add_argument('--outbase', default=None,
                          help='basename for the output file')
     parser.add_argument('--renderer', default='lines1',
                         help="(none)")
+    parser.add_argument('--frames', default=None, type=int,
+                        help='How many frames per generation to make')
     parser.add_argument('--size', default=1200, type=int,
                         help='(none)')
     parser.add_argument('--random-seed', default=None, type=int,
@@ -143,7 +150,7 @@ if __name__ == '__main__':
             template_dict["LEN"] = len(input_array)
 
         for n in range(args.versions):
-            im = array_to_image(input_array, args.size)
+            im = array_to_image(input_array, args.size, frames=args.frames)
             if args.outbase is not None:
                 dirname = os.path.dirname(infile)
                 outfile = os.path.join(dirname, args.outbase)
