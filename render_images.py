@@ -150,7 +150,10 @@ if __name__ == '__main__':
             template_dict["LEN"] = len(input_array)
 
         for n in range(args.versions):
-            im = array_to_image(input_array, args.size, frames=args.frames)
+            if args.frames is None:
+                im = array_to_image(input_array, args.size)
+            else:
+                im = array_to_image(input_array, args.size, frames=args.frames)
             if args.outbase is not None:
                 dirname = os.path.dirname(infile)
                 outfile = os.path.join(dirname, args.outbase)
