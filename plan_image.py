@@ -21,6 +21,7 @@ model_vgg16 = None
 model_resnet50 = None
 
 render_size = 512
+frames = None
 
 do_all = False
 cur_cat_index = None
@@ -84,7 +85,7 @@ def append_category_blacklist(filename):
     f.write("{} # {}\n".format(cur_cat_index, imagenet_name))
 
 # closure around function to grab variables
-def get_optimization_function(active_models, imagenet_indexes, array_to_image_fn, render_size):
+def get_optimization_function(active_models, imagenet_indexes, array_to_image_fn, render_size, frames):
   do_score_reverse = False
   if 'MODEL_REVERSE' in os.environ:
     print("-> predictions reversed")  
@@ -110,13 +111,21 @@ def get_optimization_function(active_models, imagenet_indexes, array_to_image_fn
 
     # build lists of images at all needed sizes
     for w in wa:
-      img = array_to_image_fn(w, render_size)
+      if frames is None:
+        img = array_to_image_fn(w, render_size)
+      else:
+        img = array_to_image_fn(w, render_size, frames)
       for target_size in target_size_table:
         if target_size == "None":
           imr = img
         else:
           imr = img.resize(target_size, resample=Image.BILINEAR)
-        target_size_table[target_size].append(image.img_to_array(imr))
+        if type(imr) is list:
+          # TODO: is it better maybe to leave as a PIL?
+          imr_array = [image.img_to_array(im) for im in imr]
+        else:
+          imr_array = image.img_to_array(imr)
+        target_size_table[target_size].append(imr_array)
 
     # for k in target_size_table:
     #   print("_____+++", k, len(target_size_table[k]))
@@ -500,7 +509,7 @@ def optimize(outdir, array_to_image, f, iterations=1000, numpop=100, preview_siz
     w = np.clip(w, 0.01, 0.99)
 
 def main():
-    global good_enough, max_dry_period, render_size
+    global good_enough, max_dry_period, render_size, frames
     global sigma, alpha
 
     parser = argparse.ArgumentParser(description="shape optimization")
@@ -536,6 +545,8 @@ def main():
                         help='Number of lines to use')
     parser.add_argument('--render-size', default=None, type=int,
                         help='Size to render during testing')
+    parser.add_argument('--frames', default=None, type=int,
+                        help='How many frames per generation to make')
     parser.add_argument('--num-pop', default=100, type=int,
                         help='Population size')
     parser.add_argument('--alpha-scale', default=1, type=float,
@@ -558,6 +569,10 @@ def main():
     if args.render_size is not None:
       render_size = args.render_size
       print("Overriding render_size to {}".format(render_size))
+
+    if args.frames is not None:
+      frames = args.frames
+      print("Overriding frames to {}".format(frames))
 
     class_mapping = open_class_mapping()
     if args.target_class is None or args.target_class == "none":
@@ -629,7 +644,7 @@ def main():
     if imagenet_indexes is None:
       objective_fn = get_optimization_function_noindex(active_models, array_to_image, render_size)
     else:
-      objective_fn = get_optimization_function(active_models, imagenet_indexes, array_to_image, render_size)
+      objective_fn = get_optimization_function(active_models, imagenet_indexes, array_to_image, render_size, frames)
     # optimize(outdir, objective_fn, args.num_pop, 1000)
     if args.input_array is not None:
         initial_array = np.load(args.input_array)
