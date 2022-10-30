@@ -363,7 +363,7 @@ def optimize(outdir, array_to_image, f, iterations=1000, numpop=100, preview_siz
 
       # hack: enable random head
       if rand_head is not None and rand_head > 0:
-        print("RUNNING RANDOM HEAD FOR INIT ({})".format(rand_head))
+        print(f"RUNNING RANDOM HEAD FOR INIT ({rand_head}, L={head_length})")
         num_shuf = int(numpop/2)
         w_try[:num_shuf,0:head_length,:] = np.random.uniform(low=0.02, high=0.98, size=(num_shuf, head_length, 8))
 
@@ -467,7 +467,7 @@ def optimize(outdir, array_to_image, f, iterations=1000, numpop=100, preview_siz
 
     # hack: enable random head
     if rand_head is not None and i < rand_head:
-      print("RUNNING RANDOM HEAD FOR ITERATION {}/{}".format(i,rand_head))
+      print(f"RUNNING RANDOM HEAD FOR ITERATION {i}/{rand_head} L={head_length}")
       num_shuf = int(numpop/2)
       w_try[:num_shuf,0:head_length,:] = np.random.uniform(low=0.02, high=0.98, size=(num_shuf, head_length, 8))
 
@@ -493,7 +493,7 @@ def optimize(outdir, array_to_image, f, iterations=1000, numpop=100, preview_siz
       print("COMMITTING RANDOM HEAD FOR ITERATION {}/{}".format(i,rand_head))
       best_index = np.argmax(R)
       w_best = w_try[best_index]
-      w2[0:2] = w_best[0:2]
+      w2[0:head_length] = w_best[0:head_length]
 
     if do_freeze_hack:
       print("Applying freeze_hack on w")
