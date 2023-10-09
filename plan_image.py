@@ -363,12 +363,14 @@ def optimize(outdir, array_to_image, f, iterations=1000, numpop=100, preview_siz
 
       # hack: enable random head
       if rand_head is not None and rand_head > 0:
-        print(f"RUNNING RANDOM HEAD FOR INIT ({rand_head}, L={head_length})")
-        num_shuf = int(numpop/2)
+        num_shuf = int(3 * numpop/4)
+        # num_shuf = int(numpop/2)
+        print(f"RUNNING RANDOM HEAD FOR INIT ({rand_head}, L={head_length}, NS={num_shuf})")
         w_try[:num_shuf,0:head_length,:] = np.random.uniform(low=0.02, high=0.98, size=(num_shuf, head_length, 8))
 
       rewards, _ = f(w_try)
       best_index = np.argmax(rewards)
+      print(f"Best index is {best_index} / {numpop}")
       w_best = w_try[best_index]
       best_reward = rewards[best_index]
       best_change = (best_reward - last_best_reward) / last_best_reward
@@ -467,8 +469,9 @@ def optimize(outdir, array_to_image, f, iterations=1000, numpop=100, preview_siz
 
     # hack: enable random head
     if rand_head is not None and i < rand_head:
-      print(f"RUNNING RANDOM HEAD FOR ITERATION {i}/{rand_head} L={head_length}")
-      num_shuf = int(numpop/2)
+      num_shuf = int(3 * numpop/4)
+      # num_shuf = int(numpop)
+      print(f"RUNNING RANDOM HEAD FOR ITERATION {i}/{rand_head} L={head_length} NS={num_shuf}")
       w_try[:num_shuf,0:head_length,:] = np.random.uniform(low=0.02, high=0.98, size=(num_shuf, head_length, 8))
 
     R, _ = f(w_try)
@@ -490,8 +493,8 @@ def optimize(outdir, array_to_image, f, iterations=1000, numpop=100, preview_siz
     w2 = w + scaled_dot.T
 
     if rand_head is not None and i < rand_head:
-      print("COMMITTING RANDOM HEAD FOR ITERATION {}/{}".format(i,rand_head))
       best_index = np.argmax(R)
+      print(f"COMMITTING RANDOM HEAD FOR ITERATION {i}/{rand_head} ({best_index} from {len(R)})")
       w_best = w_try[best_index]
       w2[0:head_length] = w_best[0:head_length]
 
